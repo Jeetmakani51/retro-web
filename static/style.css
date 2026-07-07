@@ -1,0 +1,276 @@
+/* ==========================================================================
+   Design Tokens
+   ========================================================================== */
+:root {
+  --charcoal: #18181b;
+  --navy: #111827;
+  --purple: #6b5ca5;
+  --teal: #4e8c88;
+  --cyan: #5fa9b8;
+  --amber: #c89b4a;
+  --off-white: #e8e2d0;
+
+  --bg: var(--navy);
+  --surface: var(--charcoal);
+  --border: #3a3a42;
+  --text: var(--off-white);
+  --text-muted: #9c9585;
+  --accent: var(--amber);
+
+  --mono: "IBM Plex Mono", "Courier New", monospace;
+  --body-font: "Iowan Old Style", "Georgia", serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--body-font);
+  line-height: 1.65;
+}
+
+/* Subtle CRT scanlines + grain, applied once to body */
+body {
+  position: relative;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.02) 0px,
+    rgba(255, 255, 255, 0.02) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  opacity: 0.5;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMDAnIGhlaWdodD0nMTAwJz48ZmlsdGVyIGlkPSdub2lzZSc+PGZlVHVyYnVsZW5jZSB0eXBlPSdmcmFjdGFsTm9pc2UnIGJhc2VGcmVxdWVuY3k9JzAuOScgbnVtT2N0YXZlcz0nMicgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNub2lzZSknLz48L3N2Zz4=");
+}
+
+h1,
+h2,
+h3,
+.mono {
+  font-family: var(--mono);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+a {
+  color: var(--cyan);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+a:hover {
+  border-bottom: 1px solid var(--cyan);
+}
+
+/* ==========================================================================
+   Layout shell
+   ========================================================================== */
+.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.site-header .logo {
+  font-family: var(--mono);
+  color: var(--accent);
+  font-size: 1rem;
+}
+
+.site-nav a {
+  margin-left: 1.5rem;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.site-nav a:hover {
+  color: var(--cyan);
+}
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 2rem;
+  margin-top: 4rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ==========================================================================
+   Auth pages (login / register)
+   ========================================================================== */
+.auth-wrapper {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+  padding: 2.5rem 2rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.auth-card .prompt-line {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--teal);
+  margin-bottom: 0.25rem;
+}
+
+.auth-card h1 {
+  font-size: 1.4rem;
+  margin: 0 0 1.75rem 0;
+  color: var(--text);
+}
+
+.field-group {
+  margin-bottom: 1.25rem;
+}
+
+.field-group label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+  text-transform: lowercase;
+}
+
+.field-group input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  background-color: var(--navy);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--text);
+  font-family: var(--body-font);
+  font-size: 0.95rem;
+}
+
+.field-group input:focus {
+  outline: none;
+  border-color: var(--cyan);
+}
+
+.field-group input::placeholder {
+  color: #5a5a63;
+}
+
+.btn {
+  display: inline-block;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background-color: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border-radius: 2px;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.btn:hover {
+  background-color: var(--accent);
+  color: var(--navy);
+}
+
+.auth-footer-line {
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.auth-footer-line a {
+  color: var(--cyan);
+}
+
+/* ==========================================================================
+   Flash messages
+   ========================================================================== */
+.message-log {
+  border: 1px solid var(--teal);
+  background-color: rgba(78, 140, 136, 0.08);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 2px;
+}
+
+.message-line {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--teal);
+  margin: 0;
+}
+
+.message-line:not(:last-child) {
+  margin-bottom: 0.35rem;
+}
+
+/* ==========================================================================
+   Home / hero
+   ========================================================================== */
+.home-wrapper {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+  padding: 2rem;
+}
+
+.hero {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.hero h1 {
+  font-size: 1.9rem;
+  color: var(--text);
+  margin: 0.5rem 0 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+}
+
+.hero-subtext {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}

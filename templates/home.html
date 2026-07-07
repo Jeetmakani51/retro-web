@@ -1,12 +1,28 @@
+{% load static %}
+
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
     <title>home</title>
   </head>
   <body>
-    <h1>Welcome {{request.user.username}}</h1>
-    <a href="/logout">Logout</a>
+    {% include 'menus.html' %}
+
+    <main class="home-wrapper">
+      <section class="hero">
+        <p class="prompt-line">&gt; session_active</p>
+        <h1>Welcome, {{ request.user.username }}</h1>
+        <p class="hero-subtext">
+          logged in from an undisclosed terminal &mdash; all systems nominal
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      &copy; 2026 &mdash; Built with &#9825; by Jeet Makani
+    </footer>
   </body>
 </html>
