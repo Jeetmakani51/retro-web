@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import GrindPost
 from django.shortcuts import get_object_or_404
+from django.views.decorators.cache import never_cache
 
 # Create your views here.
 
@@ -51,7 +52,7 @@ def logout_view(request):
 
 @login_required(login_url="login")
 def home_view(request):
-    return render(request, 'home.html')
+    return render(request, 'grind_page.html')
 
 def create_grind_post(request):
     if request.user.is_authenticated:
@@ -59,13 +60,14 @@ def create_grind_post(request):
             text = request.POST.get('text', '').strip()
             if not text:
                 return redirect('grind_feed')
-            tag = request.POST.get('tag')
+            tag = request.POST.get('tags')
             GrindPost.objects.create(user=request.user,content=text, tag=tag)
             return redirect('grind_feed')
         return render(request, 'grind_page.html')
     else:
         return redirect('login_view')
     
+@never_cache
 def grind_feed(request):
     grind_list = GrindPost.objects.all()
     return render(request, 'grind_page.html', {'grinding' : grind_list})

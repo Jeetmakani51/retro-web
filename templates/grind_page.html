@@ -1,3 +1,5 @@
+{% load static %}
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -7,16 +9,64 @@
     <title>grind</title>
   </head>
   <body>
-    <form method="post">
-      {% csrf_token %}
-      <input type="text" name="text" required />
-      <input type="text" name="tags" required />
-      <input type="number" name="respect_count" />
-      <button type="submit">Post</button>
+    {% include 'menus.html' %}
 
-      {% for g in grinding}
-      <p>{{content}}</p>
-      <p>{{tag}}</p>
-    </form>
+    <main class="grind-wrapper">
+      <section class="grind-composer">
+        <p class="prompt-line">&gt; log_entry</p>
+        <form method="post" action="{% url 'create_grind_post' %}">
+          {% csrf_token %}
+
+          <div class="field-group">
+            <label for="text">what are you grinding on</label>
+            <input
+              type="text"
+              id="text"
+              name="text"
+              placeholder="shipped the auth module today..."
+              required
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="tags">tag</label>
+            <select id="tags" name="tags" required>
+              <option value="grinding">grinding</option>
+              <option value="goal">goal</option>
+              <option value="quote">quote</option>
+              <option value="win">win</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn">post</button>
+        </form>
+      </section>
+
+      <section class="grind-feed">
+        <p class="prompt-line">&gt; feed --latest</p>
+
+        {% for g in grinding %}
+        <article class="grind-post">
+          <div class="grind-post-meta">
+            <span class="grind-user">{{ g.user.username }}</span>
+            <span class="grind-tag grind-tag-{{ g.tag }}">#{{ g.tag }}</span>
+            <span class="grind-time">{{ g.created_at|timesince }} ago</span>
+          </div>
+          <p class="grind-content">{{ g.content }}</p>
+          <a href="{% url 'respect_post' g.id %}" class="respect-link">
+            [+{{ g.respect_count }} respect]
+          </a>
+        </article>
+        {% empty %}
+        <p class="grind-empty">
+          no entries yet &mdash; be the first to log in.
+        </p>
+        {% endfor %}
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      &copy; 2026 &mdash; running quietly since forever
+    </footer>
   </body>
 </html>

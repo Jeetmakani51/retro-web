@@ -1,6 +1,4 @@
-/* ==========================================================================
-   Design Tokens
-   ========================================================================== */
+/* design */
 :root {
   --charcoal: #18181b;
   --navy: #111827;
@@ -86,9 +84,7 @@ a:hover {
   border-bottom: 1px solid var(--cyan);
 }
 
-/* ==========================================================================
-   Layout shell
-   ========================================================================== */
+/* layout shell */
 .site-header {
   border-bottom: 1px solid var(--border);
   padding: 1.25rem 2rem;
@@ -124,9 +120,7 @@ a:hover {
   text-align: center;
 }
 
-/* ==========================================================================
-   Auth pages (login / register)
-   ========================================================================== */
+/* auth pages */
 .auth-wrapper {
   min-height: calc(100vh - 140px);
   display: flex;
@@ -224,9 +218,7 @@ a:hover {
   color: var(--cyan);
 }
 
-/* ==========================================================================
-   Flash messages
-   ========================================================================== */
+/* flash messages */
 .message-log {
   border: 1px solid var(--teal);
   background-color: rgba(78, 140, 136, 0.08);
@@ -246,9 +238,7 @@ a:hover {
   margin-bottom: 0.35rem;
 }
 
-/* ==========================================================================
-   Home / hero
-   ========================================================================== */
+/* home */
 .home-wrapper {
   min-height: calc(100vh - 140px);
   display: flex;
@@ -273,4 +263,116 @@ a:hover {
 .hero-subtext {
   color: var(--text-muted);
   font-size: 0.95rem;
+}
+
+/* grind feed */
+
+.grind-wrapper {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.grind-composer {
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+  padding: 1.75rem;
+  border-radius: 4px;
+  margin-bottom: 2.5rem;
+}
+
+.grind-composer .field-group {
+  margin-bottom: 1rem;
+}
+
+.grind-composer select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background-color: var(--navy);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}
+
+.grind-composer select:focus {
+  outline: none;
+  border-color: var(--cyan);
+}
+
+.grind-feed .prompt-line {
+  margin-bottom: 1.25rem;
+}
+
+.grind-post {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  background-color: var(--surface);
+}
+
+.grind-post-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+
+.grind-user {
+  color: var(--cyan);
+}
+
+.grind-tag {
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--text-muted);
+}
+
+.grind-tag-goal {
+  color: var(--purple);
+  border-color: var(--purple);
+}
+.grind-tag-win {
+  color: var(--amber);
+  border-color: var(--amber);
+}
+.grind-tag-quote {
+  color: var(--teal);
+  border-color: var(--teal);
+}
+.grind-tag-grinding {
+  color: var(--cyan);
+  border-color: var(--cyan);
+}
+
+.grind-time {
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.grind-content {
+  font-size: 0.95rem;
+  color: var(--text);
+  margin: 0 0 0.75rem 0;
+}
+
+.respect-link {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--amber);
+}
+
+.respect-link:hover {
+  border-bottom: 1px solid var(--amber);
+}
+
+.grind-empty {
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.85rem;
 }
