@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    <title>grind</title>
+  </head>
+  <body>
+    <form method="post">
+      {% csrf_token %}
+      <input type="text" name="text" required />
+      <input type="text" name="tags" required />
+      <input type="number" name="respect_count" />
+      <button type="submit">Post</button>
+
+      {% for g in grinding}
+      <p>{{content}}</p>
+      <p>{{tag}}</p>
+    </form>
+  </body>
+</html>

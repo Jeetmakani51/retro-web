@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from .models import GrindPost
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 
@@ -50,3 +52,29 @@ def logout_view(request):
 @login_required(login_url="login")
 def home_view(request):
     return render(request, 'home.html')
+
+def create_grind_post(request):
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            text = request.POST.get('text', '').strip()
+            if not text:
+                return redirect('grind_feed')
+            tag = request.POST.get('tag')
+            GrindPost.objects.create(user=request.user,content=text, tag=tag)
+            return redirect('grind_feed')
+        return render(request, 'grind_page.html')
+    else:
+        return redirect('login_view')
+    
+def grind_feed(request):
+    grind_list = GrindPost.objects.all()
+    return render(request, 'grind_page.html', {'grinding' : grind_list})
+
+def respect_post(request,post_id):
+    if request.user.is_authenticated:
+        post = get_object_or_404(GrindPost, id=post_id)
+        post.respect_count += 1
+        post.save()
+        return redirect('grind_feed')
+    else:
+        return redirect('login_view')
