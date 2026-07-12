@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import GrindPost
+from .models import GrindPost, GrindComment
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import never_cache
 
@@ -77,6 +77,17 @@ def respect_post(request,post_id):
         post = get_object_or_404(GrindPost, id=post_id)
         post.respect_count += 1
         post.save()
+        return redirect('grind_feed')
+    else:
+        return redirect('login_view')
+
+def add_comment(request, post_id):
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            text = request.POST.get('text', '').strip()
+            if text:
+                post = get_object_or_404(GrindPost, id=post_id)
+                GrindComment.objects.create(post=post, user=request.user, text=text)
         return redirect('grind_feed')
     else:
         return redirect('login_view')

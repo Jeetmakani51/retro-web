@@ -17,3 +17,12 @@ class GrindPost(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+class GrindComment(models.Model):
+    post = models.ForeignKey(GrindPost, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.CharField(max_length=280)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']

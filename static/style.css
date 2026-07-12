@@ -376,3 +376,94 @@ a:hover {
   font-family: var(--mono);
   font-size: 0.85rem;
 }
+
+/*comment toggle*/
+.comment-toggle {
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+}
+
+.comment-toggle summary {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--cyan);
+  cursor: pointer;
+  list-style: none;
+}
+
+.comment-toggle summary::-webkit-details-marker {
+  display: none;
+}
+
+.comment-toggle summary:hover {
+  border-bottom: 1px solid var(--cyan);
+}
+
+.comment-list {
+  margin-top: 0.75rem;
+}
+
+.comment-line {
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--border);
+}
+
+.comment-user {
+  font-family: var(--mono);
+  color: var(--purple);
+  margin-right: 0.5rem;
+}
+
+.comment-text {
+  color: var(--text);
+}
+
+.comment-empty {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: var(--mono);
+}
+
+.comment-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.comment-form input {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  background-color: var(--navy);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--text);
+  font-family: var(--body-font);
+  font-size: 0.85rem;
+}
+
+.comment-form input:focus {
+  outline: none;
+  border-color: var(--cyan);
+}
+
+.btn-small {
+  padding: 0.4rem 0.8rem;
+  background-color: transparent;
+  border: 1px solid var(--teal);
+  color: var(--teal);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  cursor: pointer;
+  border-radius: 2px;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.btn-small:hover {
+  background-color: var(--teal);
+  color: var(--navy);
+}

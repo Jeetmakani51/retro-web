@@ -56,6 +56,31 @@
           <a href="{% url 'respect_post' g.id %}" class="respect-link">
             [+{{ g.respect_count }} respect]
           </a>
+
+          <details class="comment-toggle">
+            <summary>[{{ g.comments.count }} comments]</summary>
+
+            <div class="comment-list">
+              {% for c in g.comments.all %}
+              <div class="comment-line">
+                <span class="comment-user">{{ c.user.username }}</span>
+                <span class="comment-text">{{ c.text }}</span>
+              </div>
+              {% empty %}
+              <p class="comment-empty">no comments yet.</p>
+              {% endfor %}
+            </div>
+
+            <form
+              method="post"
+              action="{% url 'add_comment' g.id %}"
+              class="comment-form"
+            >
+              {% csrf_token %}
+              <input type="text" name="text" placeholder="reply..." required />
+              <button type="submit" class="btn-small">reply</button>
+            </form>
+          </details>
         </article>
         {% empty %}
         <p class="grind-empty">

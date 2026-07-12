@@ -9,5 +9,6 @@ urlpatterns = [
     path('logout', views.logout_view, name = 'logout_view'),
     path('grindpost', views.create_grind_post, name = 'create_grind_post'),
     path('grindfeed', views.grind_feed, name = 'grind_feed'),
-    path('respect/<int:post_id>', views.respect_post, name = 'respect_post')
+    path('respect/<int:post_id>', views.respect_post, name = 'respect_post'),
+    path('comment/<int:post_id>', views.add_comment, name='add_comment'),
 ]
