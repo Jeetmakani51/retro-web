@@ -4,10 +4,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import GrindPost, GrindComment
+from .models import GrindPost, GrindComment, DailyPrompt, DailyAnswer
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import never_cache
-
+from django.utils import timezone
 # Create your views here.
 
 def register_view(request):
@@ -41,7 +41,7 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            return redirect('home_view')
+            return redirect('grind_feed') #before it was 'home_view'
         else:
             messages.error(request, "Invalid username or password")
     return render(request, 'login.html')
@@ -91,3 +91,28 @@ def add_comment(request, post_id):
         return redirect('grind_feed')
     else:
         return redirect('login_view')
+    
+def daily_question(request):
+    today = timezone.localdate()
+    prompt = DailyPrompt.objects.filter(date=today).first()
+
+    user_answered = False
+    if prompt and request.user.is_authenticated:
+        user_answered = DailyAnswer.objects.filter(prompt=prompt, user=request.user).exists()
+    answers = prompt.answers.all() if prompt else []
+    return render(request,'daily_question.html',{
+        'prompt' : prompt,
+        'answers' : answers,
+        'user_answered' : user_answered,
+    })
+
+def submit_daily_answer(request,prompt_id):
+    if not request.user.is_authenticated:
+        return redirect('login_view')
+    if request.method == 'POST':
+        text = request.POST.get('text','').strip()
+        prompt = get_object_or_404(DailyPrompt, id = prompt_id)
+        already_answered = DailyAnswer.objects.filter(prompt=prompt, user=request.user).exists()
+        if text and not already_answered:
+            DailyAnswer.objects.create(prompt=prompt, user=request.user, text=text)
+    return redirect('daily_question')

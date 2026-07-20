@@ -11,4 +11,6 @@ urlpatterns = [
     path('grindfeed', views.grind_feed, name = 'grind_feed'),
     path('respect/<int:post_id>', views.respect_post, name = 'respect_post'),
     path('comment/<int:post_id>', views.add_comment, name='add_comment'),
+    path('daily', views.daily_question, name='daily_question'),
+    path('daily/answer/<int:prompt_id>', views.submit_daily_answer, name='submit_daily_answer'),
 ]

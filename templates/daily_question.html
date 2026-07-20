@@ -1,0 +1,74 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    <title>daily question</title>
+  </head>
+  <body>
+    {% include 'menus.html' %}
+
+    <main class="daily-wrapper">
+      {% if prompt %}
+      <section class="daily-card">
+        <p class="prompt-line">&gt; question_of_the_day</p>
+        <h1 class="daily-question">{{ prompt.question }}</h1>
+
+        {% if not user_answered %}
+        <form
+          method="post"
+          action="{% url 'submit_daily_answer' prompt.id %}"
+          class="daily-form"
+        >
+          {% csrf_token %}
+          <div class="field-group">
+            <label for="text">your answer</label>
+            <input
+              type="text"
+              id="text"
+              name="text"
+              placeholder="type your answer..."
+              required
+            />
+          </div>
+          <button type="submit" class="btn">submit answer</button>
+        </form>
+
+        <p class="daily-locked-note">
+          &gt; answers unlock once you submit yours
+        </p>
+
+        {% else %}
+        <div class="daily-answers">
+          <p class="prompt-line">&gt; responses ({{ answers|length }})</p>
+
+          {% for a in answers %}
+          <div class="daily-answer-line">
+            <span class="daily-answer-user">{{ a.user.username }}</span>
+            <span class="daily-answer-text">{{ a.text }}</span>
+          </div>
+          {% empty %}
+          <p class="daily-empty">no responses yet.</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </section>
+
+      {% else %}
+      <section class="daily-card">
+        <p class="prompt-line">&gt; question_of_the_day</p>
+        <p class="daily-empty">
+          no question posted for today yet. check back later.
+        </p>
+      </section>
+      {% endif %}
+    </main>
+
+    <footer class="site-footer">
+      &copy; 2026 &mdash; running quietly since forever
+    </footer>
+  </body>
+</html>

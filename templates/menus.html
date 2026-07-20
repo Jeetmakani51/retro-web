@@ -1,4 +1,15 @@
-<nav class="menu">
-  <a href="/login">Login</a>
-  <a href="/logout">Logout</a>
+<nav class="site-nav-bar">
+  <a href="{% url 'home_view' %}" class="nav-logo">~/system</a>
+
+  <div class="nav-links">
+    {% if request.user.is_authenticated %}
+    <!--<a href="{% url 'home_view' %}">home</a>-->
+    <a href="{% url 'grind_feed' %}">grind</a>
+    <a href="{% url 'daily_question' %}">daily</a>
+    <a href="{% url 'logout_view' %}">logout</a>
+    {% else %}
+    <a href="{% url 'login_view' %}">login</a>
+    <a href="{% url 'register_view' %}">register</a>
+    {% endif %}
+  </div>
 </nav>

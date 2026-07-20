@@ -26,3 +26,21 @@ class GrindComment(models.Model):
 
     class Meta:
         ordering = ['created_at']
+
+class DailyPrompt(models.Model):
+    question = models.CharField(max_length=280)
+    date = models.DateField(unique=True)
+
+    def __str__(self):
+        return f"{self.date}: {self.question}"
+
+
+class DailyAnswer(models.Model):
+    prompt = models.ForeignKey(DailyPrompt, on_delete=models.CASCADE, related_name='answers')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.CharField(max_length=280)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('prompt', 'user')  # one answer per user per prompt
