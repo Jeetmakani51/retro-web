@@ -13,4 +13,6 @@ urlpatterns = [
     path('comment/<int:post_id>', views.add_comment, name='add_comment'),
     path('daily', views.daily_question, name='daily_question'),
     path('daily/answer/<int:prompt_id>', views.submit_daily_answer, name='submit_daily_answer'),
+    path('capsule', views.create_capsule, name='create_capsule'),
+    path('capsules', views.capsule_list, name='capsule_list'),
 ]

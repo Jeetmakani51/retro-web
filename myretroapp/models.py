@@ -44,3 +44,17 @@ class DailyAnswer(models.Model):
     class Meta:
         ordering = ['-created_at']
         unique_together = ('prompt', 'user')  # one answer per user per prompt
+
+class TimeCapsule(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_capsules')
+    recipient = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='received_capsules',
+        null=True, blank=True  # blank = message to your own future self
+    )
+    content = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+    unlock_date = models.DateField()
+    opened = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['unlock_date']

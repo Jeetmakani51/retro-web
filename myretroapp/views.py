@@ -4,10 +4,11 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import GrindPost, GrindComment, DailyPrompt, DailyAnswer
+from .models import GrindPost, GrindComment, DailyPrompt, DailyAnswer, TimeCapsule
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.utils import timezone
+from datetime import timedelta
 # Create your views here.
 
 def register_view(request):
@@ -116,3 +117,59 @@ def submit_daily_answer(request,prompt_id):
         if text and not already_answered:
             DailyAnswer.objects.create(prompt=prompt, user=request.user, text=text)
     return redirect('daily_question')
+
+def create_capsule(request):
+    if not request.user.is_authenticated:
+        return redirect('login_view')
+    if request.method == 'POST':
+        content = request.POST.get('content', '').strip()
+        days = request.POST.get('days')
+        recipient_username = request.POST.get('recipient', '').strip()
+
+        if not content or not days:
+            messages.error(request, "message and unlock time are required.")
+            return redirect('capsule_list')
+
+        recipient = None
+        if recipient_username:
+            recipient = User.objects.filter(username=recipient_username).first()
+            if recipient is None:
+                messages.error(request, f"no user found with username '{recipient_username}'.")
+                return redirect('capsule_list')
+
+        unlock_date = timezone.localdate() + timedelta(days=int(days))
+        TimeCapsule.objects.create(
+            sender=request.user,
+            recipient=recipient,
+            content=content,
+            unlock_date=unlock_date,
+        )
+        messages.success(request, "capsule sealed.")
+        return redirect('capsule_list')
+
+    return render(request, 'capsule_page.html')
+
+@never_cache
+def capsule_list(request):
+    if not request.user.is_authenticated:
+        return redirect('login_view')
+
+    today = timezone.localdate()
+
+    # capsules sent by this user, OR addressed to this user, OR addressed to nobody (self-notes)
+    my_capsules = TimeCapsule.objects.filter(sender=request.user)
+    received_capsules = TimeCapsule.objects.filter(recipient=request.user)
+
+    all_capsules = (my_capsules | received_capsules).distinct()
+
+    capsule_data = []
+    for c in all_capsules:
+        is_unlocked = c.unlock_date <= today
+        days_left = (c.unlock_date - today).days if not is_unlocked else 0
+        capsule_data.append({
+            'obj': c,
+            'is_unlocked': is_unlocked,
+            'days_left': days_left,
+        })
+
+    return render(request, 'capsule_page.html', {'capsules': capsule_data})

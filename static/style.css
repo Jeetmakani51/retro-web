@@ -571,3 +571,77 @@ a:hover {
 .nav-links a:hover {
   color: var(--cyan);
 }
+
+/*time capsule*/
+
+.capsule-wrapper {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.capsule-composer {
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+  padding: 1.75rem;
+  border-radius: 4px;
+  margin-bottom: 2.5rem;
+}
+
+.capsule-composer .field-group {
+  margin-bottom: 1rem;
+}
+
+.capsule-list .prompt-line {
+  margin-bottom: 1.25rem;
+}
+
+.capsule-item {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  background-color: var(--surface);
+}
+
+.capsule-locked {
+  border-style: dashed;
+  opacity: 0.85;
+}
+
+.capsule-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+
+.capsule-from {
+  color: var(--purple);
+}
+
+.capsule-date {
+  color: var(--text-muted);
+}
+
+.capsule-content {
+  color: var(--text);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.capsule-locked-text {
+  font-family: var(--mono);
+  color: var(--amber);
+  font-size: 0.85rem;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.capsule-empty {
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}

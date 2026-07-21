@@ -1,0 +1,103 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    <title>time capsule</title>
+  </head>
+  <body>
+    {% include 'menus.html' %}
+
+    <main class="capsule-wrapper">
+      {% if messages %}
+      <div class="message-log">
+        {% for message in messages %}
+        <p class="message-line">&gt; {{ message }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <section class="capsule-composer">
+        <p class="prompt-line">&gt; seal_message</p>
+        <form method="post" action="{% url 'create_capsule' %}">
+          {% csrf_token %}
+
+          <div class="field-group">
+            <label for="content">your message</label>
+            <input
+              type="text"
+              id="content"
+              name="content"
+              placeholder="dear future me..."
+              required
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="days">unlock in (days)</label>
+            <input
+              type="number"
+              id="days"
+              name="days"
+              placeholder="30"
+              min="1"
+              required
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="recipient"
+              >recipient (optional &mdash; leave blank for yourself)</label
+            >
+            <input
+              type="text"
+              id="recipient"
+              name="recipient"
+              placeholder="username"
+            />
+          </div>
+
+          <button type="submit" class="btn">seal capsule</button>
+        </form>
+      </section>
+
+      <section class="capsule-list">
+        <p class="prompt-line">&gt; your_capsules</p>
+
+        {% for c in capsules %}
+        <article
+          class="capsule-item {% if not c.is_unlocked %}capsule-locked{% endif %}"
+        >
+          <div class="capsule-meta">
+            <span class="capsule-from">
+              {{ c.obj.sender.username }} {% if c.obj.recipient %} &rarr; {{
+              c.obj.recipient.username }}{% endif %}
+            </span>
+            <span class="capsule-date">unlocks {{ c.obj.unlock_date }}</span>
+          </div>
+
+          {% if c.is_unlocked %}
+          <p class="capsule-content">{{ c.obj.content }}</p>
+          {% else %}
+          <p class="capsule-locked-text">
+            [LOCKED] decrypts in {{ c.days_left }} day{{ c.days_left|pluralize
+            }}
+          </p>
+          {% endif %}
+        </article>
+        {% empty %}
+        <p class="capsule-empty">
+          no capsules yet &mdash; seal your first one above.
+        </p>
+        {% endfor %}
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      &copy; 2026 &mdash; running quietly since forever
+    </footer>
+  </body>
+</html>
