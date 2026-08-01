@@ -18,4 +18,5 @@ urlpatterns = [
     path('signal', views.signal_page, name='signal_page'),
     path('guestbook', views.guestbook, name='guestbook'),
     path('guestbook/sign', views.sign_guestbook, name='sign_guestbook'),
+    path('breach', views.hacker_typer, name='hacker_typer'),
 ]

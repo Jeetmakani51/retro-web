@@ -3,16 +3,112 @@
 
   <div class="nav-links">
     {% if request.user.is_authenticated %}
-    <!--<a href="{% url 'home_view' %}">home</a>-->
+    <a href="{% url 'home_view' %}">home</a>
     <a href="{% url 'grind_feed' %}">grind</a>
     <a href="{% url 'daily_question' %}">daily</a>
-    <a href="{% url 'logout_view' %}">logout</a>
     <a href="{% url 'capsule_list' %}">capsules</a>
-    <a href="{% url 'signal_page' %}">signalPage</a>
     <a href="{% url 'guestbook' %}">guestbook</a>
+    <a href="{% url 'signal_page' %}">signal</a>
+    <a href="{% url 'hacker_typer' %}">breach</a>
+    <a href="{% url 'logout_view' %}">logout</a>
     {% else %}
     <a href="{% url 'login_view' %}">login</a>
     <a href="{% url 'register_view' %}">register</a>
     {% endif %}
   </div>
 </nav>
+
+<div id="screensaverOverlay" class="screensaver-overlay" hidden>
+  <canvas id="screensaverCanvas"></canvas>
+  <p class="screensaver-hint">click or press any key to wake</p>
+</div>
+
+<script>
+  (function () {
+    const IDLE_TIMEOUT = 60000; // 60 seconds
+    const overlay = document.getElementById("screensaverOverlay");
+    const canvas = document.getElementById("screensaverCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let idleTimer = null;
+    let animationFrame = null;
+    let isActive = false;
+
+    // Matrix rain state
+    let columns = [];
+    const chars = "アイウエオカキクケコサシスセソタチツテト0123456789ABCDEF";
+    const fontSize = 16;
+
+    const colors = ["#C89B4A", "#5FA9B8", "#4E8C88", "#6B5CA5"];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const colCount = Math.floor(canvas.width / fontSize);
+      columns = new Array(colCount).fill(0).map(() => Math.random() * -100);
+    }
+
+    function drawMatrixFrame() {
+      ctx.fillStyle = "rgba(17, 24, 39, 0.08)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.font = `${fontSize}px monospace`;
+
+      for (let i = 0; i < columns.length; i++) {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        const x = i * fontSize;
+        const y = columns[i] * fontSize;
+
+        const color = colors[i % colors.length];
+        ctx.fillStyle = color;
+        ctx.fillText(char, x, y);
+
+        if (y > canvas.height && Math.random() > 0.975) {
+          columns[i] = 0;
+        } else {
+          columns[i]++;
+        }
+      }
+
+      animationFrame = requestAnimationFrame(drawMatrixFrame);
+    }
+
+    function showScreensaver() {
+      if (isActive) return;
+      isActive = true;
+      overlay.hidden = false;
+      resizeCanvas();
+      ctx.fillStyle = "#111827";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      drawMatrixFrame();
+    }
+
+    function hideScreensaver() {
+      if (!isActive) return;
+      isActive = false;
+      overlay.hidden = true;
+      cancelAnimationFrame(animationFrame);
+    }
+
+    function resetIdleTimer() {
+      if (isActive) {
+        hideScreensaver();
+      }
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(showScreensaver, IDLE_TIMEOUT);
+    }
+
+    ["mousemove", "mousedown", "keydown", "scroll", "touchstart"].forEach(
+      (evt) => {
+        document.addEventListener(evt, resetIdleTimer, { passive: true });
+      },
+    );
+
+    overlay.addEventListener("click", hideScreensaver);
+    window.addEventListener("resize", () => {
+      if (isActive) resizeCanvas();
+    });
+
+    resetIdleTimer();
+  })();
+</script>

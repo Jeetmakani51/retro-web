@@ -199,3 +199,6 @@ def sign_guestbook(request):
             color = random.choice(['amber', 'cyan', 'teal', 'purple'])
             GuestbookEntry.objects.create(user=request.user, message=message, color=color)
     return redirect('guestbook')
+
+def hacker_typer(request):
+    return render(request, 'hacker_typer.html')
