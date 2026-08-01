@@ -173,3 +173,6 @@ def capsule_list(request):
         })
 
     return render(request, 'capsule_page.html', {'capsules': capsule_data})
+
+def signal_page(request):
+    return render(request, 'signal_page.html')

@@ -1,0 +1,266 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    <title>signal degradation</title>
+  </head>
+  <body>
+    {% include 'menus.html' %}
+
+    <main class="signal-wrapper">
+      <p class="prompt-line">&gt; signal_degradation.exe</p>
+      <h1 class="signal-title">Upload. Corrupt. Export.</h1>
+      <p class="signal-subtext">
+        drop an image, dial in the decay, download the result.
+      </p>
+
+      <section class="signal-layout">
+        <div class="signal-canvas-area">
+          <div id="dropZone" class="signal-dropzone">
+            <p id="dropZoneText">&gt; drop image here, or click to browse</p>
+            <input type="file" id="fileInput" accept="image/*" hidden />
+          </div>
+          <canvas id="signalCanvas" class="signal-canvas" hidden></canvas>
+        </div>
+
+        <div class="signal-controls">
+          <p class="prompt-line">&gt; controls</p>
+
+          <div class="signal-control-group">
+            <label class="signal-checkbox">
+              <input type="checkbox" id="toggleScanlines" checked />
+              scanlines
+            </label>
+            <label class="signal-checkbox">
+              <input type="checkbox" id="toggleVignette" checked />
+              vignette
+            </label>
+            <label class="signal-checkbox">
+              <input type="checkbox" id="toggleGrain" checked />
+              grain
+            </label>
+            <label class="signal-checkbox">
+              <input type="checkbox" id="toggleAberration" checked />
+              chromatic aberration
+            </label>
+            <label class="signal-checkbox">
+              <input type="checkbox" id="toggleAscii" />
+              ascii mode
+            </label>
+          </div>
+
+          <div class="field-group">
+            <label for="intensity">signal decay</label>
+            <input type="range" id="intensity" min="0" max="100" value="50" />
+          </div>
+
+          <button id="downloadBtn" class="btn" disabled>export image</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      &copy; 2026 &mdash; running quietly since forever
+    </footer>
+
+    <script>
+      const dropZone = document.getElementById("dropZone");
+      const dropZoneText = document.getElementById("dropZoneText");
+      const fileInput = document.getElementById("fileInput");
+      const canvas = document.getElementById("signalCanvas");
+      const ctx = canvas.getContext("2d");
+      const downloadBtn = document.getElementById("downloadBtn");
+      const intensitySlider = document.getElementById("intensity");
+
+      const toggles = {
+        scanlines: document.getElementById("toggleScanlines"),
+        vignette: document.getElementById("toggleVignette"),
+        grain: document.getElementById("toggleGrain"),
+        aberration: document.getElementById("toggleAberration"),
+        ascii: document.getElementById("toggleAscii"),
+      };
+
+      let originalImage = null;
+      const MAX_DIM = 900; // cap resolution for performance
+
+      dropZone.addEventListener("click", () => fileInput.click());
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("signal-dropzone-active");
+      });
+      dropZone.addEventListener("dragleave", () => {
+        dropZone.classList.remove("signal-dropzone-active");
+      });
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("signal-dropzone-active");
+        if (e.dataTransfer.files.length) loadImage(e.dataTransfer.files[0]);
+      });
+      fileInput.addEventListener("change", (e) => {
+        if (e.target.files.length) loadImage(e.target.files[0]);
+      });
+
+      function loadImage(file) {
+        if (!file.type.startsWith("image/")) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            originalImage = img;
+            setupCanvas(img);
+            render();
+            dropZone.hidden = true;
+            canvas.hidden = false;
+            downloadBtn.disabled = false;
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function setupCanvas(img) {
+        let w = img.width;
+        let h = img.height;
+        if (w > MAX_DIM || h > MAX_DIM) {
+          const scale = MAX_DIM / Math.max(w, h);
+          w = Math.round(w * scale);
+          h = Math.round(h * scale);
+        }
+        canvas.width = w;
+        canvas.height = h;
+      }
+
+      function render() {
+        if (!originalImage) return;
+        const w = canvas.width;
+        const h = canvas.height;
+        const intensity = intensitySlider.value / 100;
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.drawImage(originalImage, 0, 0, w, h);
+
+        if (toggles.ascii.checked) {
+          renderAscii(w, h, intensity);
+          return;
+        }
+
+        let imageData = ctx.getImageData(0, 0, w, h);
+
+        if (toggles.aberration.checked) {
+          imageData = applyChromaticAberration(imageData, w, h, intensity);
+        }
+        if (toggles.grain.checked) {
+          imageData = applyGrain(imageData, intensity);
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        if (toggles.scanlines.checked) applyScanlines(w, h, intensity);
+        if (toggles.vignette.checked) applyVignette(w, h, intensity);
+      }
+
+      function applyChromaticAberration(imageData, w, h, intensity) {
+        const src = imageData.data;
+        const out = new Uint8ClampedArray(src.length);
+        const shift = Math.round(intensity * 8);
+
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const i = (y * w + x) * 4;
+
+            const rX = Math.min(w - 1, x + shift);
+            const rI = (y * w + rX) * 4;
+            out[i] = src[rI]; // red channel shifted right
+
+            out[i + 1] = src[i + 1]; // green stays
+
+            const bX = Math.max(0, x - shift);
+            const bI = (y * w + bX) * 4;
+            out[i + 2] = src[bI + 2]; // blue channel shifted left
+
+            out[i + 3] = src[i + 3];
+          }
+        }
+        return new ImageData(out, w, h);
+      }
+
+      function applyGrain(imageData, intensity) {
+        const data = imageData.data;
+        const amount = intensity * 60;
+        for (let i = 0; i < data.length; i += 4) {
+          const noise = (Math.random() - 0.5) * amount;
+          data[i] += noise;
+          data[i + 1] += noise;
+          data[i + 2] += noise;
+        }
+        return imageData;
+      }
+
+      function applyScanlines(w, h, intensity) {
+        ctx.save();
+        ctx.globalAlpha = 0.15 + intensity * 0.25;
+        ctx.fillStyle = "#000000";
+        for (let y = 0; y < h; y += 3) {
+          ctx.fillRect(0, y, w, 1);
+        }
+        ctx.restore();
+      }
+
+      function applyVignette(w, h, intensity) {
+        const gradient = ctx.createRadialGradient(
+          w / 2,
+          h / 2,
+          Math.min(w, h) * 0.3,
+          w / 2,
+          h / 2,
+          Math.max(w, h) * 0.7,
+        );
+        gradient.addColorStop(0, "rgba(0,0,0,0)");
+        gradient.addColorStop(1, `rgba(0,0,0,${0.35 + intensity * 0.4})`);
+        ctx.save();
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, w, h);
+        ctx.restore();
+      }
+
+      function renderAscii(w, h, intensity) {
+        const chars = " .:-=+*#%@";
+        const cellSize = Math.max(4, Math.round(12 - intensity * 8));
+
+        const imageData = ctx.getImageData(0, 0, w, h).data;
+
+        ctx.fillStyle = "#111827";
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = "#5FA9B8";
+        ctx.font = `${cellSize}px monospace`;
+        ctx.textBaseline = "top";
+
+        for (let y = 0; y < h; y += cellSize) {
+          for (let x = 0; x < w; x += cellSize) {
+            const i = (y * w + x) * 4;
+            const brightness =
+              (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3 / 255;
+            const charIndex = Math.floor(brightness * (chars.length - 1));
+            ctx.fillText(chars[charIndex], x, y);
+          }
+        }
+      }
+
+      Object.values(toggles).forEach((t) =>
+        t.addEventListener("change", render),
+      );
+      intensitySlider.addEventListener("input", render);
+
+      downloadBtn.addEventListener("click", () => {
+        const link = document.createElement("a");
+        link.download = "degraded-signal.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
+    </script>
+  </body>
+</html>
