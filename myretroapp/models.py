@@ -58,3 +58,24 @@ class TimeCapsule(models.Model):
 
     class Meta:
         ordering = ['unlock_date']
+
+import random
+
+class GuestbookEntry(models.Model):
+    NEON_COLORS = [
+        ('amber', 'amber'),
+        ('cyan', 'cyan'),
+        ('teal', 'teal'),
+        ('purple', 'purple'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.CharField(max_length=200)
+    color = models.CharField(max_length=10, choices=NEON_COLORS, default='cyan')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class SiteVisit(models.Model):
+    count = models.PositiveIntegerField(default=0)

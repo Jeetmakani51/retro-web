@@ -4,11 +4,12 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import GrindPost, GrindComment, DailyPrompt, DailyAnswer, TimeCapsule
+from .models import GrindPost, GrindComment, DailyPrompt, DailyAnswer, TimeCapsule, GuestbookEntry, SiteVisit
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.utils import timezone
 from datetime import timedelta
+import random
 # Create your views here.
 
 def register_view(request):
@@ -176,3 +177,25 @@ def capsule_list(request):
 
 def signal_page(request):
     return render(request, 'signal_page.html')
+
+def guestbook(request):
+    stats, _ = SiteVisit.objects.get_or_create(id=1)
+    stats.count += 1
+    stats.save()
+
+    entries = GuestbookEntry.objects.all()
+    return render(request, 'guestbook_page.html', {
+        'entries': entries,
+        'visitor_count': stats.count,
+    })
+
+
+def sign_guestbook(request):
+    if not request.user.is_authenticated:
+        return redirect('login_view')
+    if request.method == 'POST':
+        message = request.POST.get('message', '').strip()
+        if message:
+            color = random.choice(['amber', 'cyan', 'teal', 'purple'])
+            GuestbookEntry.objects.create(user=request.user, message=message, color=color)
+    return redirect('guestbook')

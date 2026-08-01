@@ -16,4 +16,6 @@ urlpatterns = [
     path('capsule', views.create_capsule, name='create_capsule'),
     path('capsules', views.capsule_list, name='capsule_list'),
     path('signal', views.signal_page, name='signal_page'),
+    path('guestbook', views.guestbook, name='guestbook'),
+    path('guestbook/sign', views.sign_guestbook, name='sign_guestbook'),
 ]
