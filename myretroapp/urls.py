@@ -19,4 +19,5 @@ urlpatterns = [
     path('guestbook', views.guestbook, name='guestbook'),
     path('guestbook/sign', views.sign_guestbook, name='sign_guestbook'),
     path('breach', views.hacker_typer, name='hacker_typer'),
+    path('sequencer', views.sequencer, name='sequencer'),
 ]

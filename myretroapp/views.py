@@ -202,3 +202,6 @@ def sign_guestbook(request):
 
 def hacker_typer(request):
     return render(request, 'hacker_typer.html')
+
+def sequencer(request):
+    return render(request, 'sequencer_page.html')

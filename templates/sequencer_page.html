@@ -1,0 +1,261 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    <title>chiptune sequencer</title>
+  </head>
+  <body>
+    {% include 'menus.html' %}
+
+    <main class="seq-wrapper">
+      <p class="prompt-line">&gt; sequencer.exe</p>
+      <h1 class="seq-title">Chiptune Sequencer</h1>
+      <p class="seq-subtext">
+        click steps to place notes. share the URL to share the beat.
+      </p>
+
+      <div class="seq-transport">
+        <button id="playBtn" class="btn">play</button>
+        <div class="field-group seq-tempo-group">
+          <label for="tempo">tempo: <span id="tempoLabel">120</span> bpm</label>
+          <input type="range" id="tempo" min="60" max="220" value="120" />
+        </div>
+        <button id="shareBtn" class="btn-small">copy share link</button>
+      </div>
+
+      <div id="grid" class="seq-grid"></div>
+    </main>
+
+    <footer class="site-footer">
+      &copy; 2026 &mdash; running quietly since forever
+    </footer>
+
+    <script>
+      (function () {
+        const TRACK_COUNT = 4;
+        const STEP_COUNT = 16;
+        const WAVEFORMS = ["square", "sawtooth", "triangle", "noise"];
+        const NOTE_FREQS = [220, 277, 330, 440]; // one base pitch per track
+
+        const grid = document.getElementById("grid");
+        const playBtn = document.getElementById("playBtn");
+        const tempoSlider = document.getElementById("tempo");
+        const tempoLabel = document.getElementById("tempoLabel");
+        const shareBtn = document.getElementById("shareBtn");
+
+        let pattern = Array.from({ length: TRACK_COUNT }, () =>
+          new Array(STEP_COUNT).fill(false),
+        );
+        let trackWaveforms = [0, 1, 2, 3]; // index into WAVEFORMS per track
+
+        let audioCtx = null;
+        let isPlaying = false;
+        let currentStep = 0;
+        let stepTimer = null;
+
+        // ---------- Build grid UI ----------
+        function buildGrid() {
+          grid.innerHTML = "";
+          for (let t = 0; t < TRACK_COUNT; t++) {
+            const row = document.createElement("div");
+            row.className = "seq-row";
+
+            const waveSelect = document.createElement("select");
+            waveSelect.className = "seq-wave-select";
+            WAVEFORMS.forEach((w, i) => {
+              const opt = document.createElement("option");
+              opt.value = i;
+              opt.textContent = w;
+              if (trackWaveforms[t] === i) opt.selected = true;
+              waveSelect.appendChild(opt);
+            });
+            waveSelect.addEventListener("change", () => {
+              trackWaveforms[t] = parseInt(waveSelect.value, 10);
+            });
+            row.appendChild(waveSelect);
+
+            const stepsWrap = document.createElement("div");
+            stepsWrap.className = "seq-steps";
+
+            for (let s = 0; s < STEP_COUNT; s++) {
+              const cell = document.createElement("button");
+              cell.type = "button";
+              cell.className = "seq-cell";
+              if (s % 4 === 0) cell.classList.add("seq-cell-beat");
+              if (pattern[t][s]) cell.classList.add("seq-cell-on");
+              cell.addEventListener("click", () => {
+                pattern[t][s] = !pattern[t][s];
+                cell.classList.toggle("seq-cell-on");
+              });
+              stepsWrap.appendChild(cell);
+            }
+
+            row.appendChild(stepsWrap);
+            grid.appendChild(row);
+          }
+        }
+
+        // ---------- Audio ----------
+        function ensureAudioContext() {
+          if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+        }
+
+        function playNote(waveformIndex, freq) {
+          const waveform = WAVEFORMS[waveformIndex];
+          const now = audioCtx.currentTime;
+          const duration = 0.12;
+
+          if (waveform === "noise") {
+            const bufferSize = audioCtx.sampleRate * duration;
+            const buffer = audioCtx.createBuffer(
+              1,
+              bufferSize,
+              audioCtx.sampleRate,
+            );
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++)
+              data[i] = Math.random() * 2 - 1;
+
+            const noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = buffer;
+
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+            noiseSource.connect(gain).connect(audioCtx.destination);
+            noiseSource.start(now);
+            noiseSource.stop(now + duration);
+            return;
+          }
+
+          const osc = audioCtx.createOscillator();
+          osc.type = waveform;
+          osc.frequency.setValueAtTime(freq, now);
+
+          const gain = audioCtx.createGain();
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + duration);
+        }
+
+        function highlightStep(step) {
+          document.querySelectorAll(".seq-steps").forEach((rowEl) => {
+            rowEl.children[currentStep]?.classList.remove("seq-cell-playing");
+            rowEl.children[step]?.classList.add("seq-cell-playing");
+          });
+        }
+
+        function tick() {
+          for (let t = 0; t < TRACK_COUNT; t++) {
+            if (pattern[t][currentStep]) {
+              playNote(trackWaveforms[t], NOTE_FREQS[t]);
+            }
+          }
+          highlightStep(currentStep);
+          currentStep = (currentStep + 1) % STEP_COUNT;
+        }
+
+        function startPlayback() {
+          ensureAudioContext();
+          isPlaying = true;
+          playBtn.textContent = "stop";
+          const bpm = parseInt(tempoSlider.value, 10);
+          const stepMs = 60000 / bpm / 4; // 16th notes
+          currentStep = 0;
+          tick();
+          stepTimer = setInterval(tick, stepMs);
+        }
+
+        function stopPlayback() {
+          isPlaying = false;
+          playBtn.textContent = "play";
+          clearInterval(stepTimer);
+          document
+            .querySelectorAll(".seq-cell-playing")
+            .forEach((c) => c.classList.remove("seq-cell-playing"));
+        }
+
+        playBtn.addEventListener("click", () => {
+          if (isPlaying) {
+            stopPlayback();
+          } else {
+            startPlayback();
+          }
+        });
+
+        tempoSlider.addEventListener("input", () => {
+          tempoLabel.textContent = tempoSlider.value;
+          if (isPlaying) {
+            clearInterval(stepTimer);
+            const stepMs = 60000 / parseInt(tempoSlider.value, 10) / 4;
+            stepTimer = setInterval(tick, stepMs);
+          }
+        });
+
+        // ---------- URL encode / decode ----------
+        function encodePattern() {
+          let bits = "";
+          for (let t = 0; t < TRACK_COUNT; t++) {
+            for (let s = 0; s < STEP_COUNT; s++) {
+              bits += pattern[t][s] ? "1" : "0";
+            }
+          }
+          // pack bits into hex (64 bits -> 16 hex chars)
+          let hex = "";
+          for (let i = 0; i < bits.length; i += 4) {
+            hex += parseInt(bits.substr(i, 4), 2).toString(16);
+          }
+          const waveCode = trackWaveforms.join("");
+          const bpm = tempoSlider.value;
+          return `${hex}-${waveCode}-${bpm}`;
+        }
+
+        function decodePattern(code) {
+          try {
+            const [hex, waveCode, bpm] = code.split("-");
+            let bits = "";
+            for (const c of hex) {
+              bits += parseInt(c, 16).toString(2).padStart(4, "0");
+            }
+            for (let t = 0; t < TRACK_COUNT; t++) {
+              for (let s = 0; s < STEP_COUNT; s++) {
+                pattern[t][s] = bits[t * STEP_COUNT + s] === "1";
+              }
+            }
+            trackWaveforms = waveCode.split("").map(Number);
+            tempoSlider.value = bpm;
+            tempoLabel.textContent = bpm;
+          } catch (e) {
+            console.warn("could not parse pattern from URL");
+          }
+        }
+
+        shareBtn.addEventListener("click", () => {
+          const code = encodePattern();
+          const url = `${window.location.origin}${window.location.pathname}?p=${code}`;
+          navigator.clipboard.writeText(url).then(() => {
+            shareBtn.textContent = "copied!";
+            setTimeout(() => (shareBtn.textContent = "copy share link"), 1500);
+          });
+        });
+
+        // ---------- Init ----------
+        const params = new URLSearchParams(window.location.search);
+        if (params.has("p")) {
+          decodePattern(params.get("p"));
+        }
+        buildGrid();
+      })();
+    </script>
+  </body>
+</html>
