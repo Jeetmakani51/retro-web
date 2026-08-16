@@ -1,70 +1,51 @@
-{% load static %}
+{% extends 'base.html' %} {% load static %} {% block title %}login{% endblock %}
+{% block content %}
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{% static 'style.css' %}" />
-    <title>login</title>
-  </head>
-  <body>
-    <header class="site-header">
-      <span class="logo">~/system</span>
-      <nav class="site-nav">
-        <a href="/register">register</a>
-      </nav>
-    </header>
+<main class="auth-wrapper">
+  <div class="auth-card">
+    <p class="prompt-line">&gt; authenticate</p>
+    <h1>Login</h1>
 
-    <main class="auth-wrapper">
-      <div class="auth-card">
-        <p class="prompt-line">&gt; authenticate</p>
-        <h1>Login</h1>
+    {% if messages %}
+    <div class="message-log">
+      {% for message in messages %}
+      <p class="message-line">&gt; {{ message }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
 
-        {% if messages %}
-        <div class="message-log">
-          {% for message in messages %}
-          <p class="message-line">&gt; {{ message }}</p>
-          {% endfor %}
-        </div>
-        {% endif %}
+    <form method="post">
+      {% csrf_token %}
 
-        <form method="post">
-          {% csrf_token %}
-
-          <div class="field-group">
-            <label for="username">username</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              placeholder="handle"
-              required
-            />
-          </div>
-
-          <div class="field-group">
-            <label for="password">password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
-          <button type="submit" class="btn">log in</button>
-        </form>
-
-        <p class="auth-footer-line">
-          no account yet? <a href="/register">register</a>
-        </p>
+      <div class="field-group">
+        <label for="username">username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="handle"
+          required
+        />
       </div>
-    </main>
 
-    <footer class="site-footer">
-      &copy; 2026 &mdash; running quietly since forever
-    </footer>
-  </body>
-</html>
+      <div class="field-group">
+        <label for="password">password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="••••••••"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn">log in</button>
+    </form>
+
+    <p class="auth-footer-line">
+      no account yet? <a href="/register">register</a>
+    </p>
+  </div>
+</main>
+
+{% endblock %}

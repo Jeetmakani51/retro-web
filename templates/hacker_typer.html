@@ -1,139 +1,121 @@
-{% load static %}
+{% extends 'base.html' %} {% load static %} {% block title %}breach protocol{% endblock %} {% block content %}
+<main class="breach-wrapper">
+  <p class="prompt-line">&gt; breach_protocol.exe</p>
+  <h1 class="breach-title">Mash keys. Break in.</h1>
+  <p class="breach-subtext">
+    any key advances the exploit. fill the meter to breach.
+  </p>
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{% static 'style.css' %}" />
-    <title>breach protocol</title>
-  </head>
-  <body>
-    {% include 'menus.html' %}
+  <div class="breach-meter-track">
+    <div id="breachFill" class="breach-meter-fill"></div>
+  </div>
+  <p id="breachPercent" class="breach-percent">0%</p>
 
-    <main class="breach-wrapper">
-      <p class="prompt-line">&gt; breach_protocol.exe</p>
-      <h1 class="breach-title">Mash keys. Break in.</h1>
-      <p class="breach-subtext">
-        any key advances the exploit. fill the meter to breach.
-      </p>
+  <div id="terminalOutput" class="breach-terminal" tabindex="0"></div>
 
-      <div class="breach-meter-track">
-        <div id="breachFill" class="breach-meter-fill"></div>
-      </div>
-      <p id="breachPercent" class="breach-percent">0%</p>
+  <div id="revealCard" class="breach-reveal" hidden>
+    <p class="prompt-line">&gt; access_granted</p>
+    <p id="revealText" class="breach-reveal-text"></p>
+    <button id="resetBtn" class="btn">run again</button>
+  </div>
+</main>
+{% endblock %} {% block extra_scripts %}
+<script>
+  (function () {
+    const terminal = document.getElementById("terminalOutput");
+    const fill = document.getElementById("breachFill");
+    const percentLabel = document.getElementById("breachPercent");
+    const revealCard = document.getElementById("revealCard");
+    const revealText = document.getElementById("revealText");
+    const resetBtn = document.getElementById("resetBtn");
 
-      <div id="terminalOutput" class="breach-terminal" tabindex="0"></div>
+    const codeLines = [
+      "sudo override --auth=root --force",
+      "decrypting sector 0x4F2A... [ok]",
+      "bypassing firewall handshake...",
+      "injecting payload into kernel_ring0",
+      "spoofing MAC address: 00:1B:44:11:3A:B7",
+      "requesting elevated session token",
+      "brute forcing keypair (attempt 3841)",
+      "rerouting traffic through proxy chain",
+      "patching memory address 0x7F3A21C4",
+      "disabling intrusion detection...",
+      "cloning access credentials",
+      "establishing reverse shell",
+      "scanning open ports: 22, 443, 8080",
+      "exfiltrating packet fragment #0091",
+      "null pointer dereference at 0x00000000",
+      "writing to protected memory region",
+      "checksum mismatch, retrying...",
+      "handshake accepted. session live.",
+    ];
 
-      <div id="revealCard" class="breach-reveal" hidden>
-        <p class="prompt-line">&gt; access_granted</p>
-        <p id="revealText" class="breach-reveal-text"></p>
-        <button id="resetBtn" class="btn">run again</button>
-      </div>
-    </main>
+    const classifiedFiles = [
+      "FILE 0x01: the mainframe's real name is printer2_old, and nobody knows why.",
+      "FILE 0x02: root password was changed in 2003 and never written down again.",
+      "FILE 0x03: subject exhibits an unusual attachment to a language called Zenith.",
+      "FILE 0x04: three engineers still believe the backup server is haunted.",
+      "FILE 0x05: the last person to read this file also mashed their keyboard for no reason.",
+      "FILE 0x06: fortune favors those who commit before they test.",
+      "FILE 0x07: this terminal has been staring back the entire time.",
+      "FILE 0x08: somewhere, a rubber duck is still waiting to be debugged to.",
+    ];
 
-    <footer class="site-footer">
-      &copy; 2026 &mdash; running quietly since forever
-    </footer>
+    let breach = 0;
+    let lineIndex = 0;
+    let breached = false;
 
-    <script>
-      (function () {
-        const terminal = document.getElementById("terminalOutput");
-        const fill = document.getElementById("breachFill");
-        const percentLabel = document.getElementById("breachPercent");
-        const revealCard = document.getElementById("revealCard");
-        const revealText = document.getElementById("revealText");
-        const resetBtn = document.getElementById("resetBtn");
+    function addLine() {
+      const line = codeLines[lineIndex % codeLines.length];
+      const p = document.createElement("p");
+      p.className = "breach-line";
+      p.textContent = "> " + line;
+      terminal.appendChild(p);
+      terminal.scrollTop = terminal.scrollHeight;
+      lineIndex++;
 
-        const codeLines = [
-          "sudo override --auth=root --force",
-          "decrypting sector 0x4F2A... [ok]",
-          "bypassing firewall handshake...",
-          "injecting payload into kernel_ring0",
-          "spoofing MAC address: 00:1B:44:11:3A:B7",
-          "requesting elevated session token",
-          "brute forcing keypair (attempt 3841)",
-          "rerouting traffic through proxy chain",
-          "patching memory address 0x7F3A21C4",
-          "disabling intrusion detection...",
-          "cloning access credentials",
-          "establishing reverse shell",
-          "scanning open ports: 22, 443, 8080",
-          "exfiltrating packet fragment #0091",
-          "null pointer dereference at 0x00000000",
-          "writing to protected memory region",
-          "checksum mismatch, retrying...",
-          "handshake accepted. session live.",
-        ];
+      while (terminal.children.length > 40) {
+        terminal.removeChild(terminal.firstChild);
+      }
+    }
 
-        const classifiedFiles = [
-          "FILE 0x01: the mainframe's real name is printer2_old, and nobody knows why.",
-          "FILE 0x02: root password was changed in 2003 and never written down again.",
-          "FILE 0x03: subject exhibits an unusual attachment to a language called Zenith.",
-          "FILE 0x04: three engineers still believe the backup server is haunted.",
-          "FILE 0x05: the last person to read this file also mashed their keyboard for no reason.",
-          "FILE 0x06: fortune favors those who commit before they test.",
-          "FILE 0x07: this terminal has been staring back the entire time.",
-          "FILE 0x08: somewhere, a rubber duck is still waiting to be debugged to.",
-        ];
+    function updateMeter() {
+      fill.style.width = breach + "%";
+      percentLabel.textContent = breach + "%";
+    }
 
-        let breach = 0;
-        let lineIndex = 0;
-        let breached = false;
+    function triggerBreach() {
+      breached = true;
+      const file =
+        classifiedFiles[Math.floor(Math.random() * classifiedFiles.length)];
+      revealText.textContent = file;
+      revealCard.hidden = false;
+      terminal.blur();
+    }
 
-        function addLine() {
-          const line = codeLines[lineIndex % codeLines.length];
-          const p = document.createElement("p");
-          p.className = "breach-line";
-          p.textContent = "> " + line;
-          terminal.appendChild(p);
-          terminal.scrollTop = terminal.scrollHeight;
-          lineIndex++;
+    function handleKey(e) {
+      if (breached) return;
+      addLine();
+      breach = Math.min(100, breach + 2);
+      updateMeter();
+      if (breach >= 100) {
+        triggerBreach();
+      }
+    }
 
-          // keep terminal from growing unbounded
-          while (terminal.children.length > 40) {
-            terminal.removeChild(terminal.firstChild);
-          }
-        }
+    terminal.addEventListener("keydown", handleKey);
+    terminal.addEventListener("click", () => terminal.focus());
+    terminal.focus();
 
-        function updateMeter() {
-          fill.style.width = breach + "%";
-          percentLabel.textContent = breach + "%";
-        }
-
-        function triggerBreach() {
-          breached = true;
-          const file =
-            classifiedFiles[Math.floor(Math.random() * classifiedFiles.length)];
-          revealText.textContent = file;
-          revealCard.hidden = false;
-          terminal.blur();
-        }
-
-        function handleKey(e) {
-          if (breached) return;
-          addLine();
-          breach = Math.min(100, breach + 2);
-          updateMeter();
-          if (breach >= 100) {
-            triggerBreach();
-          }
-        }
-
-        terminal.addEventListener("keydown", handleKey);
-        terminal.addEventListener("click", () => terminal.focus());
-        terminal.focus();
-
-        resetBtn.addEventListener("click", () => {
-          breach = 0;
-          lineIndex = 0;
-          breached = false;
-          terminal.innerHTML = "";
-          updateMeter();
-          revealCard.hidden = true;
-          terminal.focus();
-        });
-      })();
-    </script>
-  </body>
-</html>
+    resetBtn.addEventListener("click", () => {
+      breach = 0;
+      lineIndex = 0;
+      breached = false;
+      terminal.innerHTML = "";
+      updateMeter();
+      revealCard.hidden = true;
+      terminal.focus();
+    });
+  })();
+</script>
+{% endblock %}

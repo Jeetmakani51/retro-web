@@ -1,0 +1,28 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    <link rel="manifest" href="{% static 'manifest.json' %}" />
+    <meta name="theme-color" content="#18181B" />
+    <title>{% block title %}grindOS{% endblock %}</title>
+  </head>
+  <body>
+    {% include 'menus.html' %} {% block content %} {% endblock %}
+
+    <footer class="site-footer">
+      &copy; 2026 &mdash; running quietly since forever
+    </footer>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("{% static 'sw.js' %}");
+      }
+    </script>
+
+    {% block extra_scripts %} {% endblock %}
+  </body>
+</html>

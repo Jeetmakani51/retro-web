@@ -1,108 +1,89 @@
-{% load static %}
+{% extends 'base.html' %} {% load static %} {% block title %}guestbook{% endblock %} {% block content %}
+<main class="guestbook-wrapper">
+  <p class="prompt-line">&gt; sign_the_wall</p>
+  <h1 class="guestbook-title">Neon Guestbook</h1>
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{% static 'style.css' %}" />
-    <title>guestbook</title>
-  </head>
-  <body>
-    {% include 'menus.html' %}
+  <form
+    method="post"
+    action="{% url 'sign_guestbook' %}"
+    class="guestbook-form"
+  >
+    {% csrf_token %}
+    <input
+      type="text"
+      name="message"
+      placeholder="leave your mark..."
+      maxlength="200"
+      required
+    />
+    <button type="submit" class="btn">sign wall</button>
+  </form>
 
-    <main class="guestbook-wrapper">
-      <p class="prompt-line">&gt; sign_the_wall</p>
-      <h1 class="guestbook-title">Neon Guestbook</h1>
-
-      <form
-        method="post"
-        action="{% url 'sign_guestbook' %}"
-        class="guestbook-form"
-      >
-        {% csrf_token %}
-        <input
-          type="text"
-          name="message"
-          placeholder="leave your mark..."
-          maxlength="200"
-          required
-        />
-        <button type="submit" class="btn">sign wall</button>
-      </form>
-
-      <div class="brick-wall" id="brickWall">
-        {% for e in entries %}
-        <div class="neon-sign neon-{{ e.color }}">
-          <div class="neon-avatar" data-username="{{ e.user.username }}"></div>
-          <div class="neon-text-block">
-            <p class="neon-username">{{ e.user.username }}</p>
-            <p class="neon-message">{{ e.message }}</p>
-          </div>
-        </div>
-        {% empty %}
-        <p class="guestbook-empty">
-          the wall is empty &mdash; be the first to sign.
-        </p>
-        {% endfor %}
+  <div class="brick-wall" id="brickWall">
+    {% for e in entries %}
+    <div class="neon-sign neon-{{ e.color }}">
+      <div class="neon-avatar" data-username="{{ e.user.username }}"></div>
+      <div class="neon-text-block">
+        <p class="neon-username">{{ e.user.username }}</p>
+        <p class="neon-message">{{ e.message }}</p>
       </div>
+    </div>
+    {% empty %}
+    <p class="guestbook-empty">
+      the wall is empty &mdash; be the first to sign.
+    </p>
+    {% endfor %}
+  </div>
 
-      <div class="visitor-counter">
-        <span class="counter-label">visitors:</span>
-        <span class="counter-digits"
-          >{{ visitor_count|stringformat:"06d" }}</span
-        >
-      </div>
-    </main>
+  <div class="visitor-counter">
+    <span class="counter-label">visitors:</span>
+    <span class="counter-digits">{{ visitor_count|stringformat:"06d" }}</span>
+  </div>
+</main>
+{% endblock %} {% block extra_scripts %}
+<script>
+  // Deterministic pixel avatar generator, seeded from username
+  function hashString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash << 5) - hash + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  }
 
-    <footer class="site-footer">
-      &copy; 2026 &mdash; running quietly since forever
-    </footer>
+  function generateAvatar(el) {
+    const username = el.dataset.username;
+    const seed = hashString(username);
+    const size = 5; // 5x5 grid, mirrored left-right (3 unique cols)
+    const cellPx = 6;
 
-    <script>
-      // Deterministic pixel avatar generator, seeded from username
-      function hashString(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-          hash = (hash << 5) - hash + str.charCodeAt(i);
-          hash |= 0;
-        }
-        return Math.abs(hash);
+    el.innerHTML = "";
+    el.style.display = "grid";
+    el.style.gridTemplateColumns = `repeat(${size}, ${cellPx}px)`;
+    el.style.gridTemplateRows = `repeat(${size}, ${cellPx}px)`;
+
+    let bit = 0;
+    const cols = Math.ceil(size / 2); // 3 unique columns, mirrored
+
+    for (let y = 0; y < size; y++) {
+      const rowBits = [];
+      for (let x = 0; x < cols; x++) {
+        bit++;
+        const on = (seed >> bit) & 1;
+        rowBits.push(on);
       }
+      const fullRow = rowBits.concat([...rowBits].reverse().slice(1));
+      fullRow.forEach((on) => {
+        const cell = document.createElement("div");
+        cell.style.width = cellPx + "px";
+        cell.style.height = cellPx + "px";
+        cell.style.backgroundColor = on ? "currentColor" : "transparent";
+        el.appendChild(cell);
+      });
+    }
+  }
 
-      function generateAvatar(el) {
-        const username = el.dataset.username;
-        const seed = hashString(username);
-        const size = 5; // 5x5 grid, mirrored left-right (3 unique cols)
-        const cellPx = 6;
-
-        el.innerHTML = "";
-        el.style.display = "grid";
-        el.style.gridTemplateColumns = `repeat(${size}, ${cellPx}px)`;
-        el.style.gridTemplateRows = `repeat(${size}, ${cellPx}px)`;
-
-        let bit = 0;
-        const cols = Math.ceil(size / 2); // 3 unique columns, mirrored
-
-        for (let y = 0; y < size; y++) {
-          const rowBits = [];
-          for (let x = 0; x < cols; x++) {
-            bit++;
-            const on = (seed >> bit) & 1;
-            rowBits.push(on);
-          }
-          const fullRow = rowBits.concat([...rowBits].reverse().slice(1));
-          fullRow.forEach((on) => {
-            const cell = document.createElement("div");
-            cell.style.width = cellPx + "px";
-            cell.style.height = cellPx + "px";
-            cell.style.backgroundColor = on ? "currentColor" : "transparent";
-            el.appendChild(cell);
-          });
-        }
-      }
-
-      document.querySelectorAll(".neon-avatar").forEach(generateAvatar);
-    </script>
-  </body>
-</html>
+  document.querySelectorAll(".neon-avatar").forEach(generateAvatar);
+</script>
+{% endblock %}
